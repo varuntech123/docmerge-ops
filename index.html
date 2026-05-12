@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DocMerge Ops — Intranet</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        base: { 50:'#f0f4f3', 100:'#d1dbd8', 200:'#a3b7b1', 300:'#75938a', 400:'#476f63', 500:'#1a4b3c', 600:'#163d31', 700:'#112e26', 800:'#0d201b', 900:'#081110' },
+        surface: { DEFAULT:'#0f1714', card:'#151f1b', elevated:'#1a2923', border:'#243830' },
+        mint: { DEFAULT:'#34d399', light:'#6ee7b7', dark:'#059669' },
+        amber: { DEFAULT:'#f59e0b', light:'#fbbf24' },
+        rose: { DEFAULT:'#f43f5e' },
+        sky: { DEFAULT:'#38bdf8' }
+      },
+      fontFamily: {
+        display: ['Space Grotesk', 'sans-serif'],
+        body: ['IBM Plex Sans', 'sans-serif']
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root {
+    --bg: #0f1714;
+    --fg: #e2ede8;
+    --muted: #6b8a7e;
+    --accent: #34d399;
+    --card: #151f1b;
+    --border: #243830;
+    --surface-elevated: #1a2923;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background: var(--bg); color: var(--fg); font-family: 'IBM Plex Sans', sans-serif; }
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius:3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* Login background animation */
+  .login-bg {
+    background: 
+      radial-gradient(ellipse 80% 60% at 20% 80%, rgba(52,211,153,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 20%, rgba(52,211,153,0.04) 0%, transparent 60%),
+      var(--bg);
+  }
+  .login-grid {
+    background-image: 
+      linear-gradient(rgba(52,211,153,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52,211,153,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridShift 20s linear infinite;
+  }
+  @keyframes gridShift {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+  }
+
+  /* Pulse ring for status */
+  .pulse-ring {
+    animation: pulseRing 2s ease-out infinite;
+  }
+  @keyframes pulseRing {
+    0% { box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
+    70% { box-shadow: 0 0 0 8px rgba(52,211,153,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+  }
+
+  /* Slide in */
+  .slide-up {
+    animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes slideUp {
+    from { opacity:0; transform:translateY(16px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.3s ease forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity:0; }
+    to { opacity:1; }
+  }
+
+  /* Toast animation */
+  .toast-enter {
+    animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes toastIn {
+    from { opacity:0; transform:translateX(100%) scale(0.95); }
+    to { opacity:1; transform:translateX(0) scale(1); }
+  }
+  .toast-exit {
+    animation: toastOut 0.3s ease forwards;
+  }
+  @keyframes toastOut {
+    from { opacity:1; transform:translateX(0); }
+    to { opacity:0; transform:translateX(100%); }
+  }
+
+  /* Table row hover */
+  .log-row {
+    transition: background 0.15s ease;
+  }
+  .log-row:hover {
+    background: rgba(52,211,153,0.04);
+  }
+
+  /* Sidebar nav item */
+  .nav-item {
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover {
+    background: rgba(52,211,153,0.06);
+    border-left-color: rgba(52,211,153,0.3);
+  }
+  .nav-item.active {
+    background: rgba(52,211,153,0.1);
+    border-left-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Upload dropzone */
+  .dropzone {
+    border: 2px dashed var(--border);
+    transition: all 0.25s ease;
+  }
+  .dropzone.drag-over {
+    border-color: var(--accent);
+    background: rgba(52,211,153,0.05);
+  }
+  .dropzone:hover {
+    border-color: var(--muted);
+  }
+
+  /* Progress bar */
+  .progress-fill {
+    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Custom checkbox */
+  .custom-check {
+    appearance: none;
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    background: var(--card);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+  .custom-check:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .custom-check:checked::after {
+    content: '';
+    position: absolute;
+    top: 1px; left: 5px;
+    width: 5px; height: 9px;
+    border: solid var(--bg);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  /* Button styles */
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+  .btn-primary:hover { background: #6ee7b7; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(52,211,153,0.25); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none; }
+
+  .btn-secondary {
+    background: var(--surface-elevated);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .btn-secondary:hover { background: var(--border); }
+
+  .btn-danger {
+    background: rgba(244,63,94,0.15);
+    color: #fb7185;
+    border: 1px solid rgba(244,63,94,0.3);
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  .btn-danger:hover { background: rgba(244,63,94,0.25); }
+
+  /* Input styles */
+  .input-field {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    transition: all 0.2s ease;
+  }
+  .input-field:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(52,211,153,0.1);
+  }
+  .input-field::placeholder { color: var(--muted); }
+
+  /* Status badge */
+  .badge { padding: 2px 10px; border-radius: 9999px; font-size: 12px; font-weight: 500; }
+  .badge-success { background: rgba(52,211,153,0.15); color: #6ee7b7; }
+  .badge-warning { background: rgba(245,158,11,0.15); color: #fbbf24; }
+  .badge-error { background: rgba(244,63,94,0.15); color: #fb7185; }
+  .badge-info { background: rgba(56,189,248,0.15); color: #7dd3fc; }
+  .badge-neutral { background: rgba(107,138,126,0.15); color: #9cb3a7; }
+
+  /* Modal overlay */
+  .modal-overlay {
+    background: rgba(8,17,16,0.8);
+    backdrop-filter: blur(4px);
+  }
+
+  /* Stat card glow */
+  .stat-glow {
+    position: relative;
+  }
+  .stat-glow::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; right: -1px; bottom: -1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(52,211,153,0.1), transparent 60%);
+    z-index: -1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-3 max-w-sm pointer-events-none" aria-live="polite"></div>
+
+<!-- Modal Container -->
+<div id="modal-container" class="fixed inset-0 z-[9998] hidden"></div>
+
+<!-- App Root -->
+<div id="app"></div>
+
+<script>
+// ============================================================
+// Application State
+// ============================================================
+const DEFAULT_STATE = {
+  currentUser: null,
+  currentScreen: 'login',
+  uploadLogs: [],
+  mergeJobs: [],
+  sidebarCollapsed: false,
+  mobileMenuOpen: false
+};
+
+let AppState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+// ============================================================
+// Mock Data Constants
+// ============================================================
+const MOCK_USERS = [
+  { email: 'admin@intranet.local', password: 'Admin@2024', name: 'Rajiv Mehta', role: 'Administrator' },
+  { email: 'ops@intranet.local', password: 'Ops@2024', name: 'Priya Sharma', role: 'Operator' }
+];
+
+const CLIENT_NAMES = [
+  'Arun Kumar', 'Deepa Nair', 'Suresh Iyer', 'Meena Desai', 'Vikram Patel',
+  'Anita Rao', 'Ramesh Gupta', 'Kavita Joshi', 'Sanjay Verma', 'Lakshmi Reddy',
+  'Pradeep Menon', 'Usha Krishnan', 'Girish Bhat', 'Nandini Saxena', 'Harish Chandra'
+];
+
+const STATUS_OPTIONS = ['completed', 'processing', 'pending', 'failed'];
+
+// ============================================================
+// Data Persistence Logic
+// ============================================================
+function saveState() {
+  try {
+    localStorage.setItem('docmerge_state', JSON.stringify(AppState));
+  } catch (e) {
+    console.warn("LocalStorage unavailable");
+  }
+}
+
+function loadState() {
+  const saved = localStorage.getItem('docmerge_state');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    // Merge saved state to ensure structure integrity
+    AppState = { ...DEFAULT_STATE, ...parsed };
+    // Ensure currentUser is null on load (require login again for security simulation)
+    AppState.currentUser = null; 
+    AppState.currentScreen = 'login';
+  } else {
+    initMockData();
+  }
+}
+
+function resetData() {
+  localStorage.removeItem('docmerge_state');
+  AppState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+  initMockData();
+  showToast('Demo data reset successfully', 'success');
+  renderApp();
+}
+
+// ============================================================
+// Mock Data Generators
+// ============================================================
+function generateUploadLogs() {
+  const logs = [];
+  const years = [2021, 2022, 2023, 2024];
+  for (let i = 0; i < 18; i++) {
+    const year = years[Math.floor(Math.random() * years.length)];
+    const clientCount = Math.floor(Math.random() * 12) + 3;
+    const status = STATUS_OPTIONS[Math.floor(Math.random() * 4)];
+    const day = Math.floor(Math.random() * 28) + 1;
+    const month = Math.floor(Math.random() * 12);
+    const date = new Date(2024, month, day, Math.floor(Math.random()*12)+8, Math.floor(Math.random()*60));
+    logs.push({
+      id: `UPD-${String(1000+i).padStart(5,'0')}`,
+      uploadedBy: i % 3 === 0 ? 'Rajiv Mehta' : 'Priya Sharma',
+      uploadDate: date.toISOString(),
+      year: year,
+      fileName: `client_data_${year}_Q${Math.floor(Math.random()*4)+1}.xlsx`,
+      clientCount: clientCount,
+      status: status,
+      fileSize: `${(Math.random()*2+0.5).toFixed(1)} MB`
+    });
+  }
+  logs.sort((a,b) => new Date(b.uploadDate) - new Date(a.uploadDate));
+  return logs;
+}
+
+function generateMergeJobs(uploadLogs) {
+  return uploadLogs.filter(l => l.status !== 'pending').map((log, i) => {
+    const clients = [];
+    for (let c = 0; c < log.clientCount; c++) {
+      const status = log.status === 'failed' && c === Math.floor(log.clientCount/2) ? 'failed' :
+                     log.status === 'processing' && c > log.clientCount/2 ? 'pending' : 'completed';
+      clients.push({
+        id: `CLT-${String(100+c).padStart(4,'0')}`,
+        name: CLIENT_NAMES[c % CLIENT_NAMES.length],
+        status: status,
+        pdfGenerated: status === 'completed',
+        signedPdfUploaded: status === 'completed' && Math.random() > 0.4,
+        emailSent: status === 'completed' && Math.random() > 0.6,
+        email: CLIENT_NAMES[c % CLIENT_NAMES.length].toLowerCase().replace(' ', '.') + '@client.com'
+      });
+    }
+    return {
+      id: `MRG-${String(1000+i).padStart(5,'0')}`,
+      uploadId: log.id,
+      year: log.year,
+      status: log.status,
+      clients: clients,
+      startedAt: log.uploadDate,
+      completedAt: log.status === 'completed' ? new Date(new Date(log.uploadDate).getTime() + log.clientCount * 8000).toISOString() : null
+    };
+  });
+}
+
+function initMockData() {
+  AppState.uploadLogs = generateUploadLogs();
+  AppState.mergeJobs = generateMergeJobs(AppState.uploadLogs);
+}
+
+// ============================================================
+// Toast System
+// ============================================================
+function showToast(message, type = 'info', duration = 4000) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  const iconMap = { success:'fa-check-circle', error:'fa-exclamation-circle', warning:'fa-exclamation-triangle', info:'fa-info-circle' };
+  const colorMap = { success:'#34d399', error:'#f43f5e', warning:'#f59e0b', info:'#38bdf8' };
+  
+  toast.className = 'toast-enter pointer-events-auto flex items-start gap-3 p-4 rounded-lg shadow-2xl';
+  toast.style.cssText = `background:var(--card); border:1px solid var(--border); min-width:300px;`;
+  toast.innerHTML = `
+    <i class="fas ${iconMap[type]} mt-0.5" style="color:${colorMap[type]}"></i>
+    <div class="flex-1">
+      <p class="text-sm" style="color:var(--fg)">${message}</p>
+    </div>
+    <button onclick="this.parentElement.classList.replace('toast-enter','toast-exit');setTimeout(()=>this.parentElement.remove(),300)" 
+            class="text-xs opacity-50 hover:opacity-100 transition-opacity" style="color:var(--muted)" aria-label="Dismiss">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    if (toast.parentElement) {
+      toast.classList.replace('toast-enter', 'toast-exit');
+      setTimeout(() => toast.remove(), 300);
+    }
+  }, duration);
+}
+
+// ============================================================
+// Modal System
+// ============================================================
+function showModal(content, { width = 'max-w-lg', onClose } = {}) {
+  const container = document.getElementById('modal-container');
+  container.className = 'fixed inset-0 z-[9998] flex items-center justify-center modal-overlay fade-in p-4';
+  container.innerHTML = `
+    <div class="${width} w-full mx-auto rounded-xl shadow-2xl slide-up relative" style="background:var(--card); border:1px solid var(--border)">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-muted hover:text-fg transition-colors z-10">
+        <i class="fas fa-times"></i>
+      </button>
+      ${content}
+    </div>
+  `;
+  container.onclick = (e) => { if (e.target === container) closeModal(); };
+  document.addEventListener('keydown', modalEscHandler);
+}
+
+function closeModal() {
+  const container = document.getElementById('modal-container');
+  container.innerHTML = '';
+  container.className = 'fixed inset-0 z-[9998] hidden';
+  document.removeEventListener('keydown', modalEscHandler);
+}
+
+function modalEscHandler(e) { if (e.key === 'Escape') closeModal(); }
+
+// ============================================================
+// Utility Functions
+// ============================================================
+function formatDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+}
+function formatDateTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) + ' ' +
+         d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true });
+}
+function formatSize(bytes) { return (bytes/1024/1024).toFixed(1) + ' MB'; }
+function getStatusBadge(status) {
+  const map = { completed:'badge-success', processing:'badge-info', pending:'badge-warning', failed:'badge-error' };
+  return `<span class="badge ${map[status] || 'badge-neutral'}">${status.charAt(0).toUpperCase()+status.slice(1)}</span>`;
+}
+
+// ============================================================
+// Screen: Login
+// ============================================================
+function renderLogin() {
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="login-bg login-grid min-h-screen flex items-center justify-center p-4">
+      <div class="w-full max-w-md slide-up">
+        <!-- Logo / Branding -->
+        <div class="text-center mb-10">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5" style="background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.2)">
+            <i class="fas fa-file-signature text-2xl" style="color:var(--accent)"></i>
+          </div>
+          <h1 class="font-display text-3xl font-bold tracking-tight" style="color:var(--fg)">DocMerge Ops</h1>
+          <p class="mt-2 text-sm" style="color:var(--muted)">Document Merge & Dispatch System — Intranet</p>
+        </div>
+        
+        <!-- Login Card -->
+        <div class="rounded-xl p-8" style="background:var(--card); border:1px solid var(--border)">
+          <h2 class="font-display text-lg font-semibold mb-6" style="color:var(--fg)">Sign in to your account</h2>
+          <form id="login-form" class="space-y-5" novalidate>
+            <div>
+              <label for="login-email" class="block text-sm font-medium mb-2" style="color:var(--muted)">Email address</label>
+              <div class="relative">
+                <i class="fas fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style="color:var(--muted)"></i>
+                <input id="login-email" type="email" placeholder="you@intranet.local" autocomplete="email"
+                       class="input-field w-full pl-10 pr-4 py-3 rounded-lg text-sm" required>
+              </div>
+              <p id="email-error" class="text-xs mt-1.5 hidden" style="color:#f43f5e"></p>
+            </div>
+            <div>
+              <label for="login-password" class="block text-sm font-medium mb-2" style="color:var(--muted)">Password</label>
+              <div class="relative">
+                <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style="color:var(--muted)"></i>
+                <input id="login-password" type="password" placeholder="Enter your password" autocomplete="current-password"
+                       class="input-field w-full pl-10 pr-11 py-3 rounded-lg text-sm" required>
+                <button type="button" id="toggle-pw" class="absolute right-3 top-1/2 -translate-y-1/2 text-sm hover:opacity-80 transition-opacity" style="color:var(--muted)" aria-label="Toggle password visibility">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              <p id="pw-error" class="text-xs mt-1.5 hidden" style="color:#f43f5e"></p>
+            </div>
+            <button type="submit" class="btn-primary w-full py-3 rounded-lg text-sm font-display">
+              Sign In
+            </button>
+          </form>
+        </div>
+
+        <!-- Security notice -->
+        <div class="mt-6 flex items-start gap-2.5 px-1">
+          <i class="fas fa-shield-halved text-xs mt-0.5" style="color:rgba(52,211,153,0.5)"></i>
+          <p class="text-xs leading-relaxed" style="color:var(--muted)">
+            This system operates on the internal network only. Access is restricted to authorized personnel. 
+            All activities are logged and audited.
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Event handlers
+  document.getElementById('toggle-pw').addEventListener('click', function() {
+    const inp = document.getElementById('login-password');
+    const icon = this.querySelector('i');
+    if (inp.type === 'password') {
+      inp.type = 'text'; icon.className = 'fas fa-eye-slash';
+    } else {
+      inp.type = 'password'; icon.className = 'fas fa-eye';
+    }
+  });
+
+  document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const emailErr = document.getElementById('email-error');
+    const pwErr = document.getElementById('pw-error');
+    emailErr.classList.add('hidden'); pwErr.classList.add('hidden');
+
+    let valid = true;
+    if (!email) { emailErr.textContent='Email is required'; emailErr.classList.remove('hidden'); valid=false; }
+    else if (!/\S+@\S+\.\S+/.test(email)) { emailErr.textContent='Enter a valid email address'; emailErr.classList.remove('hidden'); valid=false; }
+    if (!password) { pwErr.textContent='Password is required'; pwErr.classList.remove('hidden'); valid=false; }
+    if (!valid) return;
+
+    const user = MOCK_USERS.find(u => u.email === email && u.password === password);
+    if (!user) {
+      pwErr.textContent='Invalid email or password'; pwErr.classList.remove('hidden');
+      showToast('Authentication failed. Check your credentials.', 'error');
+      return;
+    }
+
+    AppState.currentUser = user;
+    AppState.currentScreen = 'browse';
+    saveState(); // Persist login state logic (optional, but keeps session alive on refresh)
+    showToast(`Welcome back, ${user.name}`, 'success');
+    renderApp();
+  });
+}
+
+// ============================================================
+// Sidebar Component
+// ============================================================
+function renderSidebar() {
+  const navItems = [
+    { id:'browse', icon:'fa-clock-rotate-left', label:'Browse Logs' },
+    { id:'upload', icon:'fa-cloud-arrow-up', label:'Upload File' },
+    { id:'merge', icon:'fa-code-merge', label:'Merge Status' },
+    { id:'signed', icon:'fa-file-signature', label:'Signed PDFs' },
+    { id:'dispatch', icon:'fa-paper-plane', label:'Email Dispatch' }
+  ];
+
+  const collapsed = AppState.sidebarCollapsed;
+  const mobileOpen = AppState.mobileMenuOpen;
+  
+  // Mobile classes vs Desktop classes
+  const sidebarClasses = `
+    fixed lg:static inset-y-0 left-0 z-40 
+    transform transition-transform duration-300 ease-in-out
+    ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+    h-screen flex flex-col 
+    ${collapsed ? 'w-[68px]' : 'w-60'}
+  `;
+
+  return `
+    <aside class="${sidebarClasses}" 
+           style="background:var(--card); border-right:1px solid var(--border)" role="navigation" aria-label="Main navigation">
+      <!-- Brand -->
+      <div class="flex items-center ${collapsed ? 'justify-center' : 'gap-3 px-5'} h-16 shrink-0" style="border-bottom:1px solid var(--border)">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style="background:rgba(52,211,153,0.15)">
+          <i class="fas fa-file-signature text-sm" style="color:var(--accent)"></i>
+        </div>
+        ${collapsed ? '' : '<span class="font-display font-bold text-base" style="color:var(--fg)">DocMerge</span>'}
+      </div>
+
+      <!-- Nav Items -->
+      <nav class="flex-1 py-4 overflow-y-auto">
+        <div class="${collapsed ? 'px-2' : 'px-3'} space-y-1">
+          ${navItems.map(item => `
+            <button onclick="navigateTo('${item.id}'); closeMobileMenu();" 
+                    class="nav-item ${AppState.currentScreen === item.id ? 'active' : ''} w-full flex items-center ${collapsed ? 'justify-center' : 'gap-3'} rounded-lg py-2.5 ${collapsed ? 'px-0' : 'px-3'} text-sm transition-all"
+                    style="${AppState.currentScreen !== item.id ? 'color:var(--muted)' : ''}"
+                    title="${item.label}" aria-current="${AppState.currentScreen === item.id ? 'page' : 'false'}">
+              <i class="fas ${item.icon} text-sm w-5 text-center"></i>
+              ${collapsed ? '' : `<span>${item.label}</span>`}
+            </button>
+          `).join('')}
+        </div>
+      </nav>
+
+      <!-- Collapse toggle + User -->
+      <div class="shrink-0" style="border-top:1px solid var(--border)">
+        <div class="${collapsed ? 'px-2 py-2' : 'px-4 py-3'} flex items-center ${collapsed ? 'justify-center' : 'gap-3'}">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0" 
+               style="background:rgba(52,211,153,0.15); color:var(--accent)">
+            ${AppState.currentUser ? AppState.currentUser.name.split(' ').map(n=>n[0]).join('') : 'U'}
+          </div>
+          ${collapsed ? '' : `
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium truncate" style="color:var(--fg)">${AppState.currentUser?.name || ''}</p>
+              <p class="text-xs truncate" style="color:var(--muted)">${AppState.currentUser?.role || ''}</p>
+            </div>
+          `}
+        </div>
+        <div class="${collapsed ? 'px-2 pb-2 flex flex-col gap-1' : 'px-3 pb-3 flex gap-2'}">
+          <button onclick="AppState.sidebarCollapsed=!AppState.sidebarCollapsed;renderApp()" 
+                  class="hidden lg:flex flex-1 items-center justify-center gap-2 py-2 rounded-lg text-xs transition-all hover:opacity-80" 
+                  style="background:var(--surface-elevated); color:var(--muted)" aria-label="Toggle sidebar">
+            <i class="fas ${collapsed ? 'fa-angles-right' : 'fa-angles-left'} text-xs"></i>
+            ${collapsed ? '' : '<span>Collapse</span>'}
+          </button>
+          <button onclick="resetData()" 
+                  class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs transition-all hover:opacity-80" 
+                  style="background:rgba(56,189,248,0.08); color:#38bdf8" title="Reset Demo Data">
+            <i class="fas fa-rotate-right text-xs"></i>
+          </button>
+          <button onclick="handleLogout()" 
+                  class="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs transition-all hover:opacity-80" 
+                  style="background:rgba(244,63,94,0.08); color:#fb7185" aria-label="Sign out">
+            <i class="fas fa-right-from-bracket text-xs"></i>
+            ${collapsed ? '' : '<span>Sign Out</span>'}
+          </button>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Mobile Overlay -->
+    ${mobileOpen ? `
+    <div onclick="closeMobileMenu()" class="fixed inset-0 z-30 bg-black/50 lg:hidden fade-in"></div>
+    ` : ''}
+  `;
+}
+
+function closeMobileMenu() {
+  AppState.mobileMenuOpen = false;
+  renderApp();
+}
+
+function toggleMobileMenu() {
+  AppState.mobileMenuOpen = !AppState.mobileMenuOpen;
+  renderApp();
+}
+
+// ============================================================
+// Screen: Browse Logs
+// ============================================================
+function renderBrowseScreen() {
+  const logs = AppState.uploadLogs;
+  const completed = logs.filter(l => l.status === 'completed').length;
+  const processing = logs.filter(l => l.status === 'processing').length;
+  const failed = logs.filter(l => l.status === 'failed').length;
+  const totalClients = logs.reduce((s,l) => s + l.clientCount, 0);
+
+  return `
+    <div class="slide-up">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-4">
+          <button class="lg:hidden p-2 rounded-lg" style="background:var(--surface-elevated); color:var(--muted)" onclick="toggleMobileMenu()">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div>
+            <h1 class="font-display text-2xl font-bold" style="color:var(--fg)">Upload Logs</h1>
+            <p class="text-sm mt-1" style="color:var(--muted)">View history of all data file uploads and their processing status</p>
+          </div>
+        </div>
+        <button onclick="navigateTo('upload')" class="btn-primary px-4 py-2.5 rounded-lg text-sm flex items-center gap-2">
+          <i class="fas fa-plus text-xs"></i> New Upload
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        ${[
+          { label:'Total Uploads', value:logs.length, icon:'fa-cloud-arrow-up', color:'var(--accent)' },
+          { label:'Completed', value:completed, icon:'fa-circle-check', color:'#34d399' },
+          { label:'Processing', value:processing, icon:'fa-spinner', color:'#38bdf8' },
+          { label:'Total Clients', value:totalClients, icon:'fa-users', color:'#f59e0b' }
+        ].map(s => `
+          <div class="stat-glow rounded-xl p-4" style="background:var(--card); border:1px solid var(--border)">
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-medium" style="color:var(--muted)">${s.label}</span>
+              <i class="fas ${s.icon} text-sm" style="color:${s.color}; opacity:0.6"></i>
+            </div>
+            <p class="font-display text-2xl font-bold" style="color:var(--fg)">${s.value}</p>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap items-center gap-3 mb-4">
+        <div class="relative flex-1 min-w-[200px] max-w-xs">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color:var(--muted)"></i>
+          <input type="text" id="log-search" placeholder="Search by ID or filename..." 
+                 class="input-field w-full pl-9 pr-4 py-2 rounded-lg text-sm" oninput="filterLogs()">
+        </div>
+        <select id="log-status-filter" class="input-field py-2 px-3 rounded-lg text-sm" onchange="filterLogs()">
+          <option value="">All Statuses</option>
+          <option value="completed">Completed</option>
+          <option value="processing">Processing</option>
+          <option value="pending">Pending</option>
+          <option value="failed">Failed</option>
+        </select>
+        <select id="log-year-filter" class="input-field py-2 px-3 rounded-lg text-sm" onchange="filterLogs()">
+          <option value="">All Years</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="rounded-xl overflow-hidden" style="background:var(--card); border:1px solid var(--border)">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border)">
+                <th class="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider" style="color:var(--muted)">Upload ID</th>
+                <th class="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider" style="color:var(--muted)">Date</th>
+                <th class="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider" style="color:var(--muted)">Year</th>
+                <th class="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider" style="color:var(--muted)">File</th>
+                <th class="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider" style="color:var(--muted)">Clients</th>
+                <th class="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider" style="color:var(--muted)">Uploaded By</th>
+                <th class="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider" style="color:var(--muted)">Status</th>
+                <th class="text-left px-5 py-3 font-medium text-xs uppercase tracking-wider" style="color:var(--muted)">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="log-table-body">
+              ${logs.map(log => `
+                <tr class="log-row" style="border-bottom:1px solid var(--border)" data-id="${log.id}" data-status="${log.status}" data-year="${log.year}" data-file="${log.fileName.toLowerCase()}">
+                  <td class="px-5 py-3.5 font-mono text-xs" style="color:var(--accent)">${log.id}</td>
+                  <td class="px-5 py-3.5 text-xs" style="color:var(--muted)">${formatDateTime(log.uploadDate)}</td>
+                  <td class="px-5 py-3.5 font-medium">${log.year}</td>
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <i class="fas fa-file-excel text-xs" style="color:#059669"></i>
+                      <span class="text-xs">${log.fileName}</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5 text-xs">${log.clientCount}</td>
+                  <td class="px-5 py-3.5 text-xs" style="color:var(--muted)">${log.uploadedBy}</td>
+                  <td class="px-5 py-3.5">${getStatusBadge(log.status)}</td>
+                  <td class="px-5 py-3.5">
+                    <button onclick="showLogDetail('${log.id}')" class="text-xs px-2.5 py-1 rounded-md transition-all hover:opacity-80" style="background:var(--surface-elevated); color:var(--accent)">
+                      View
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        ${logs.length === 0 ? `
+          <div class="flex flex-col items-center justify-center py-16">
+            <i class="fas fa-inbox text-4xl mb-3" style="color:var(--border)"></i>
+            <p class="text-sm" style="color:var(--muted)">No upload logs found</p>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function filterLogs() {
+  const search = document.getElementById('log-search').value.toLowerCase();
+  const status = document.getElementById('log-status-filter').value;
+  const year = document.getElementById('log-year-filter').value;
+  const rows = document.querySelectorAll('#log-table-body tr');
+  rows.forEach(row => {
+    const matchSearch = !search || row.dataset.id.toLowerCase().includes(search) || row.dataset.file.includes(search);
+    const matchStatus = !status || row.dataset.status === status;
+    const matchYear = !year || row.dataset.year === year;
+    row.style.display = (matchSearch && matchStatus && matchYear) ? '' : 'none';
+  });
+}
+
+function showLogDetail(logId) {
+  const log = AppState.uploadLogs.find(l => l.id === logId);
+  if (!log) return;
+  const mergeJob = AppState.mergeJobs.find(m => m.uploadId === logId);
+  
+  let clientRows = '';
+  if (mergeJob) {
+    clientRows = mergeJob.clients.map(c => `
+      <tr style="border-bottom:1px solid var(--border)">
+        <td class="px-4 py-2 text-xs font-mono" style="color:var(--accent)">${c.id}</td>
+        <td class="px-4 py-2 text-xs">${c.name}</td>
+        <td class="px-4 py-2 text-xs" style="color:var(--muted)">${c.email}</td>
+        <td class="px-4 py-2">${getStatusBadge(c.status)}</td>
+        <td class="px-4 py-2 text-xs">${c.signedPdfUploaded ? '<i class="fas fa-check" style="color:#34d399"></i>' : '<i class="fas fa-minus" style="color:var(--muted)"></i>'}</td>
+        <td class="px-4 py-2 text-xs">${c.emailSent ? '<i class="fas fa-check" style="color:#34d399"></i>' : '<i class="fas fa-minus" style="color:var(--muted)"></i>'}</td>
+      </tr>
+    `).join('');
+  }
+
+  showModal(`
+    <div class="p-6">
+      <h3 class="font-display text-lg font-semibold mb-5" style="color:var(--fg)">Upload Detail — ${log.id}</h3>
+      <div class="grid grid-cols-2 gap-4 mb-5">
+        ${[
+          { l:'File Name', v:log.fileName },
+          { l:'Year', v:log.year },
+          { l:'Uploaded By', v:log.uploadedBy },
+          { l:'Upload Date', v:formatDateTime(log.uploadDate) },
+          { l:'File Size', v:log.fileSize },
+          { l:'Status', v:getStatusBadge(log.status) },
+        ].map(f => `
+          <div>
+            <p class="text-xs mb-1" style="color:var(--muted)">${f.l}</p>
+            <p class="text-sm font-medium">${f.v}</p>
+          </div>
+        `).join('')}
+      </div>
+      ${mergeJob ? `
+        <div style="border-top:1px solid var(--border)" class="pt-4">
+          <h4 class="font-display font-semibold text-sm mb-3" style="color:var(--fg)">Client Breakdown (${mergeJob.clients.length})</h4>
+          <div class="rounded-lg overflow-hidden" style="border:1px solid var(--border); max-height:280px; overflow-y:auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr style="background:var(--surface-elevated)">
+                  <th class="text-left px-4 py-2 text-xs font-medium" style="color:var(--muted)">Client ID</th>
+                  <th class="text-left px-4 py-2 text-xs font-medium" style="color:var(--muted)">Name</th>
+                  <th class="text-left px-4 py-2 text-xs font-medium" style="color:var(--muted)">Email</th>
+                  <th class="text-left px-4 py-2 text-xs font-medium" style="color:var(--muted)">Merge</th>
+                  <th class="text-left px-4 py-2 text-xs font-medium" style="color:var(--muted)">Signed</th>
+                  <th class="text-left px-4 py-2 text-xs font-medium" style="color:var(--muted)">Sent</th>
+                </tr>
+              </thead>
+              <tbody>${clientRows}</tbody>
+            </table>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `, { width: 'max-w-3xl' });
+}
+
+// ============================================================
+// Screen: Upload File
+// ============================================================
+function renderUploadScreen() {
+  return `
+    <div class="slide-up max-w-3xl">
+      <div class="flex items-center gap-4 mb-6">
+        <button class="lg:hidden p-2 rounded-lg" style="background:var(--surface-elevated); color:var(--muted)" onclick="toggleMobileMenu()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="font-display text-2xl font-bold" style="color:var(--fg)">Upload Client Data</h1>
+          <p class="text-sm mt-1" style="color:var(--muted)">Upload an Excel file with client data for the specified financial year</p>
+        </div>
+      </div>
+
+      <!-- Info Banner -->
+      <div class="flex items-start gap-3 rounded-xl p-4 mb-6" style="background:rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.15)">
+        <i class="fas fa-circle-info mt-0.5" style="color:#38bdf8"></i>
+        <div>
+          <p class="text-sm font-medium" style="color:#7dd3fc">Required Excel Format</p>
+          <p class="text-xs mt-1" style="color:var(--muted)">
+            The Excel file must contain columns: <code class="px-1.5 py-0.5 rounded text-xs" style="background:var(--surface-elevated); color:var(--accent)">ClientID</code>, 
+            <code class="px-1.5 py-0.5 rounded text-xs" style="background:var(--surface-elevated); color:var(--accent)">ClientName</code>, 
+            <code class="px-1.5 py-0.5 rounded text-xs" style="background:var(--surface-elevated); color:var(--accent)">Email</code>, 
+            <code class="px-1.5 py-0.5 rounded text-xs" style="background:var(--surface-elevated); color:var(--accent)">PAN</code>, 
+            <code class="px-1.5 py-0.5 rounded text-xs" style="background:var(--surface-elevated); color:var(--accent)">Field1...FieldN</code> (data fields for template).
+          </p>
+        </div>
+      </div>
+
+      <!-- Upload Form -->
+      <div class="rounded-xl p-6" style="background:var(--card); border:1px solid var(--border)">
+        <form id="upload-form" novalidate>
+          <!-- Year Selection -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium mb-2" style="color:var(--fg)">Financial Year</label>
+            <select id="upload-year" class="input-field w-full max-w-xs py-2.5 px-4 rounded-lg text-sm" required>
+              <option value="" disabled selected>Select year</option>
+              <option value="2024">FY 2024-25</option>
+              <option value="2023">FY 2023-24</option>
+              <option value="2022">FY 2022-23</option>
+              <option value="2021">FY 2021-22</option>
+            </select>
+            <p id="year-error" class="text-xs mt-1.5 hidden" style="color:#f43f5e"></p>
+          </div>
+
+          <!-- Dropzone -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium mb-2" style="color:var(--fg)">Data File</label>
+            <div id="dropzone" class="dropzone rounded-xl p-8 text-center cursor-pointer" onclick="document.getElementById('file-input').click()">
+              <div id="dropzone-content">
+                <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style="background:rgba(52,211,153,0.08)">
+                  <i class="fas fa-cloud-arrow-up text-xl" style="color:var(--accent)"></i>
+                </div>
+                <p class="text-sm font-medium mb-1" style="color:var(--fg)">Drop your Excel file here</p>
+                <p class="text-xs" style="color:var(--muted)">or click to browse — .xlsx, .xls files only</p>
+              </div>
+              <div id="file-preview" class="hidden">
+                <div class="flex items-center justify-center gap-3">
+                  <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background:rgba(5,150,105,0.15)">
+                    <i class="fas fa-file-excel" style="color:#059669"></i>
+                  </div>
+                  <div class="text-left">
+                    <p id="file-name" class="text-sm font-medium" style="color:var(--fg)"></p>
+                    <p id="file-size" class="text-xs" style="color:var(--muted)"></p>
+                  </div>
+                  <button type="button" onclick="event.stopPropagation();clearFile()" class="ml-3 w-7 h-7 rounded-md flex items-center justify-center transition-all hover:opacity-80" style="background:rgba(244,63,94,0.1); color:#fb7185" aria-label="Remove file">
+                    <i class="fas fa-times text-xs"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <input type="file" id="file-input" accept=".xlsx,.xls" class="hidden" onchange="handleFileSelect(this)">
+            <p id="file-error" class="text-xs mt-1.5 hidden" style="color:#f43f5e"></p>
+          </div>
+
+          <!-- Validation Summary -->
+          <div id="validation-summary" class="hidden mb-6 rounded-xl p-4" style="background:var(--surface-elevated); border:1px solid var(--border)">
+            <div class="flex items-center gap-2 mb-3">
+              <i class="fas fa-clipboard-check text-sm" style="color:var(--accent)"></i>
+              <span class="text-sm font-medium" style="color:var(--fg)">File Validation</span>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+              <div class="rounded-lg p-3 text-center" style="background:var(--card)">
+                <p id="val-clients" class="font-display text-lg font-bold" style="color:var(--accent)">—</p>
+                <p class="text-xs" style="color:var(--muted)">Clients</p>
+              </div>
+              <div class="rounded-lg p-3 text-center" style="background:var(--card)">
+                <p id="val-columns" class="font-display text-lg font-bold" style="color:#f59e0b">—</p>
+                <p class="text-xs" style="color:var(--muted)">Data Columns</p>
+              </div>
+              <div class="rounded-lg p-3 text-center" style="background:var(--card)">
+                <p id="val-rows" class="font-display text-lg font-bold" style="color:#38bdf8">—</p>
+                <p class="text-xs" style="color:var(--muted)">Data Rows</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-3 pt-2">
+            <button type="submit" class="btn-primary px-6 py-2.5 rounded-lg text-sm flex items-center gap-2">
+              <i class="fas fa-play text-xs"></i> Start Merge Process
+            </button>
+            <button type="button" onclick="navigateTo('browse')" class="btn-secondary px-5 py-2.5 rounded-lg text-sm">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Security Note -->
+      <div class="mt-5 flex items-start gap-2.5 px-1">
+        <i class="fas fa-lock text-xs mt-0.5" style="color:rgba(52,211,153,0.4)"></i>
+        <p class="text-xs" style="color:var(--muted)">
+          Files are processed entirely within the intranet. No data leaves the internal network. 
+          All uploads are logged with user identity and timestamp.
+        </p>
+      </div>
+    </div>
+  `;
+}
+
+let selectedFile = null;
+
+function handleFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['xlsx', 'xls'].includes(ext)) {
+    showToast('Only Excel files (.xlsx, .xls) are accepted', 'error');
+    input.value = '';
+    return;
+  }
+
+  selectedFile = file;
+  document.getElementById('dropzone-content').classList.add('hidden');
+  document.getElementById('file-preview').classList.remove('hidden');
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-size').textContent = formatSize(file.size);
+
+  // Simulate validation
+  const valSummary = document.getElementById('validation-summary');
+  valSummary.classList.remove('hidden');
+  const clients = Math.floor(Math.random() * 15) + 3;
+  const cols = Math.floor(Math.random() * 8) + 5;
+  document.getElementById('val-clients').textContent = clients;
+  document.getElementById('val-columns').textContent = cols;
+  document.getElementById('val-rows').textContent = clients;
+
+  document.getElementById('file-error').classList.add('hidden');
+}
+
+function clearFile() {
+  selectedFile = null;
+  document.getElementById('file-input').value = '';
+  document.getElementById('dropzone-content').classList.remove('hidden');
+  document.getElementById('file-preview').classList.add('hidden');
+  document.getElementById('validation-summary').classList.add('hidden');
+}
+
+// Dropzone drag events
+function initDropzone() {
+  const dz = document.getElementById('dropzone');
+  if (!dz) return;
+  ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add('drag-over'); }));
+  ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove('drag-over'); }));
+  dz.addEventListener('drop', (e) => {
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      const input = document.getElementById('file-input');
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      handleFileSelect(input);
+    }
+  });
+
+  // Form submit
+  const form = document.getElementById('upload-form');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const year = document.getElementById('upload-year').value;
+      const yearErr = document.getElementById('year-error');
+      const fileErr = document.getElementById('file-error');
+      yearErr.classList.add('hidden'); fileErr.classList.add('hidden');
+      
+      let valid = true;
+      if (!year) { yearErr.textContent='Please select a financial year'; yearErr.classList.remove('hidden'); valid=false; }
+      if (!selectedFile) { fileErr.textContent='Please upload an Excel file'; fileErr.classList.remove('hidden'); valid=false; }
+      if (!valid) return;
+
+      // Create new log entry
+      const clients = parseInt(document.getElementById('val-clients').textContent) || 5;
+      const newLog = {
+        id: `UPD-${String(1000+AppState.uploadLogs.length).padStart(5,'0')}`,
+        uploadedBy: AppState.currentUser.name,
+        uploadDate: new Date().toISOString(),
+        year: parseInt(year),
+        fileName: selectedFile.name,
+        clientCount: clients,
+        status: 'processing',
+        fileSize: formatSize(selectedFile.size)
+      };
+      AppState.uploadLogs.unshift(newLog);
+
+      // Create merge job
+      const mergeClients = [];
+      for (let c = 0; c < clients; c++) {
+        mergeClients.push({
+          id: `CLT-${String(100+c).padStart(4,'0')}`,
+          name: CLIENT_NAMES[c % CLIENT_NAMES.length],
+          email: CLIENT_NAMES[c % CLIENT_NAMES.length].toLowerCase().replace(' ', '.') + '@client.com',
+          status: c < 2 ? 'completed' : 'pending',
+          pdfGenerated: c < 2,
+          signedPdfUploaded: false,
+          emailSent: false
+        });
+      }
+      AppState.mergeJobs.unshift({
+        id: `MRG-${String(1000+AppState.mergeJobs.length).padStart(5,'0')}`,
+        uploadId: newLog.id,
+        year: parseInt(year),
+        status: 'processing',
+        clients: mergeClients,
+        startedAt: new Date().toISOString(),
+        completedAt: null
+      });
+
+      saveState();
+      showToast(`Upload successful. Merge process started for ${clients} clients.`, 'success');
+      selectedFile = null;
+      navigateTo('merge');
+    });
+  }
+}
+
+// ============================================================
+// Screen: Merge Status
+// ============================================================
+function renderMergeScreen() {
+  const jobs = AppState.mergeJobs;
+  const activeJobs = jobs.filter(j => j.status === 'processing');
+  const completedJobs = jobs.filter(j => j.status === 'completed');
+
+  return `
+    <div class="slide-up">
+      <div class="flex items-center gap-4 mb-6">
+        <button class="lg:hidden p-2 rounded-lg" style="background:var(--surface-elevated); color:var(--muted)" onclick="toggleMobileMenu()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="font-display text-2xl font-bold" style="color:var(--fg)">Merge Status</h1>
+          <p class="text-sm mt-1" style="color:var(--muted)">Monitor PDF generation progress for each client data merge</p>
+        </div>
+        ${activeJobs.length > 0 ? `
+          <button onclick="simulateMergeProgress()" class="btn-secondary px-4 py-2.5 rounded-lg text-sm flex items-center gap-2">
+            <i class="fas fa-forward text-xs"></i> Simulate Progress
+          </button>
+        ` : ''}
+      </div>
+
+      <!-- Active Jobs -->
+      ${activeJobs.length > 0 ? `
+        <div class="mb-6">
+          <h2 class="font-display text-sm font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">
+            <i class="fas fa-spinner fa-spin-pulse mr-2" style="color:#38bdf8"></i>Active Jobs
+          </h2>
+          <div class="space-y-3">
+            ${activeJobs.map(job => {
+              const done = job.clients.filter(c => c.status === 'completed').length;
+              const total = job.clients.length;
+              const pct = Math.round((done/total)*100);
+              return `
+                <div class="rounded-xl p-5" style="background:var(--card); border:1px solid var(--border)">
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                      <span class="font-mono text-xs" style="color:var(--accent)">${job.id}</span>
+                      <span class="text-sm font-medium">FY ${job.year}-${String(job.year+1).slice(2)}</span>
+                      ${getStatusBadge(job.status)}
+                    </div>
+                    <span class="text-sm font-display font-bold" style="color:var(--accent)">${pct}%</span>
+                  </div>
+                  <div class="w-full h-2 rounded-full mb-3" style="background:var(--surface-elevated)">
+                    <div class="progress-fill h-2 rounded-full" style="width:${pct}%; background:linear-gradient(90deg, #059669, #34d399)"></div>
+                  </div>
+                  <div class="flex items-center justify-between text-xs" style="color:var(--muted)">
+                    <span>${done} of ${total} clients merged</span>
+                    <span>Started ${formatDateTime(job.startedAt)}</span>
+                  </div>
+                  <!-- Client mini-list -->
+                  <div class="mt-3 flex flex-wrap gap-1.5">
+                    ${job.clients.map(c => `
+                      <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs" 
+                            style="background:${c.status==='completed' ? 'rgba(52,211,153,0.1)' : c.status==='failed' ? 'rgba(244,63,94,0.1)' : 'rgba(107,138,126,0.1)'}; color:${c.status==='completed' ? '#6ee7b7' : c.status==='failed' ? '#fb7185' : 'var(--muted)'}">
+                        <i class="fas ${c.status==='completed' ? 'fa-check' : c.status==='failed' ? 'fa-xmark' : 'fa-hourglass-half'} text-[10px]"></i>
+                        ${c.name.split(' ')[0]}
+                      </span>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Completed Jobs -->
+      <div>
+        <h2 class="font-display text-sm font-semibold uppercase tracking-wider mb-3" style="color:var(--muted)">
+          <i class="fas fa-clock-rotate-left mr-2" style="color:var(--accent)"></i>Completed & Past Jobs
+        </h2>
+        ${jobs.filter(j => j.status !== 'processing').length === 0 ? `
+          <div class="rounded-xl p-10 text-center" style="background:var(--card); border:1px solid var(--border)">
+            <i class="fas fa-inbox text-3xl mb-3" style="color:var(--border)"></i>
+            <p class="text-sm" style="color:var(--muted)">No completed merge jobs yet</p>
+          </div>
+        ` : `
+          <div class="rounded-xl overflow-hidden" style="background:var(--card); border:1px solid var(--border)">
+            <table class="w-full text-sm">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border)">
+                  <th class="text-left px-5 py-3 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Job ID</th>
+                  <th class="text-left px-5 py-3 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Year</th>
+                  <th class="text-left px-5 py-3 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Clients</th>
+                  <th class="text-left px-5 py-3 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Status</th>
+                  <th class="text-left px-5 py-3 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Completed</th>
+                  <th class="text-left px-5 py-3 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Signed PDFs</th>
+                  <th class="text-left px-5 py-3 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Emails Sent</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${jobs.filter(j => j.status !== 'processing').map(job => {
+                  const signed = job.clients.filter(c => c.signedPdfUploaded).length;
+                  const emailed = job.clients.filter(c => c.emailSent).length;
+                  return `
+                    <tr class="log-row" style="border-bottom:1px solid var(--border)">
+                      <td class="px-5 py-3 font-mono text-xs" style="color:var(--accent)">${job.id}</td>
+                      <td class="px-5 py-3 font-medium">FY ${job.year}-${String(job.year+1).slice(2)}</td>
+                      <td class="px-5 py-3 text-xs">${job.clients.length}</td>
+                      <td class="px-5 py-3">${getStatusBadge(job.status)}</td>
+                      <td class="px-5 py-3 text-xs" style="color:var(--muted)">${job.completedAt ? formatDateTime(job.completedAt) : '—'}</td>
+                      <td class="px-5 py-3 text-xs">${signed}/${job.clients.length}</td>
+                      <td class="px-5 py-3 text-xs">${emailed}/${job.clients.length}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+function simulateMergeProgress() {
+  const activeJobs = AppState.mergeJobs.filter(j => j.status === 'processing');
+  if (activeJobs.length === 0) return;
+
+  activeJobs.forEach(job => {
+    const pending = job.clients.filter(c => c.status === 'pending');
+    const toComplete = Math.min(pending.length, Math.floor(Math.random() * 3) + 1);
+    for (let i = 0; i < toComplete; i++) {
+      pending[i].status = 'completed';
+      pending[i].pdfGenerated = true;
+    }
+    // Check if all done
+    if (job.clients.every(c => c.status === 'completed')) {
+      job.status = 'completed';
+      job.completedAt = new Date().toISOString();
+      // Update corresponding upload log
+      const log = AppState.uploadLogs.find(l => l.id === job.uploadId);
+      if (log) log.status = 'completed';
+      showToast(`Merge job ${job.id} completed — ${job.clients.length} PDFs generated.`, 'success');
+    }
+  });
+
+  saveState();
+  renderApp();
+  if (AppState.mergeJobs.some(j => j.status === 'processing')) {
+    showToast('Merge progress updated. Some clients still processing.', 'info');
+  }
+}
+
+// ============================================================
+// Screen: Signed PDFs
+// ============================================================
+function renderSignedScreen() {
+  const completedJobs = AppState.mergeJobs.filter(j => j.status === 'completed');
+  const allClients = completedJobs.flatMap(j => j.clients.map(c => ({...c, jobId: j.id, year: j.year})));
+  const unsignedClients = allClients.filter(c => c.pdfGenerated && !c.signedPdfUploaded);
+  const signedClients = allClients.filter(c => c.signedPdfUploaded);
+
+  return `
+    <div class="slide-up">
+      <div class="flex items-center gap-4 mb-6">
+        <button class="lg:hidden p-2 rounded-lg" style="background:var(--surface-elevated); color:var(--muted)" onclick="toggleMobileMenu()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="font-display text-2xl font-bold" style="color:var(--fg)">Digitally Signed PDFs</h1>
+          <p class="text-sm mt-1" style="color:var(--muted)">Upload digitally signed PDFs via secure FTP. Digital signing is handled externally.</p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-4 mb-6">
+        ${[
+          { label:'Awaiting Signature', value:unsignedClients.length, color:'#f59e0b', icon:'fa-hourglass-half' },
+          { label:'Signed & Uploaded', value:signedClients.length, color:'#34d399', icon:'fa-file-circle-check' },
+          { label:'Total Generated', value:allClients.filter(c=>c.pdfGenerated).length, color:'#38bdf8', icon:'fa-file-pdf' }
+        ].map(s => `
+          <div class="rounded-xl p-4" style="background:var(--card); border:1px solid var(--border)">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs" style="color:var(--muted)">${s.label}</span>
+              <i class="fas ${s.icon} text-xs" style="color:${s.color}; opacity:0.6"></i>
+            </div>
+            <p class="font-display text-2xl font-bold" style="color:${s.color}">${s.value}</p>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Unsigned clients list -->
+      ${unsignedClients.length > 0 ? `
+        <div class="rounded-xl overflow-hidden mb-6" style="background:var(--card); border:1px solid var(--border)">
+          <div class="px-5 py-3 flex items-center justify-between" style="border-bottom:1px solid var(--border)">
+            <h2 class="font-display text-sm font-semibold" style="color:var(--fg)">Awaiting Signed PDF Upload</h2>
+            <button onclick="markAllSigned()" class="btn-primary px-3 py-1.5 rounded-md text-xs flex items-center gap-1.5">
+              <i class="fas fa-check-double text-[10px]"></i> Mark All as Uploaded
+            </button>
+          </div>
+          <div class="divide-y" style="border-color:var(--border)">
+            ${unsignedClients.map(c => `
+              <div class="flex items-center justify-between px-5 py-3 log-row">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:rgba(245,158,11,0.1)">
+                    <i class="fas fa-file-pdf text-xs" style="color:#f59e0b"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium">${c.name}</p>
+                    <p class="text-xs" style="color:var(--muted)">${c.id} — FY ${c.year}-${String(c.year+1).slice(2)} — ${c.jobId}</p>
+                  </div>
+                </div>
+                <button onclick="markSigned('${c.jobId}','${c.id}')" class="btn-secondary px-3 py-1.5 rounded-md text-xs flex items-center gap-1.5">
+                  <i class="fas fa-check text-[10px]"></i> Mark as Uploaded
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : completedJobs.length > 0 ? `
+        <div class="rounded-xl p-10 text-center mb-6" style="background:var(--card); border:1px solid var(--border)">
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style="background:rgba(52,211,153,0.1)">
+            <i class="fas fa-check-double text-xl" style="color:var(--accent)"></i>
+          </div>
+          <p class="text-sm font-medium" style="color:var(--fg)">All signed PDFs have been uploaded</p>
+          <p class="text-xs mt-1" style="color:var(--muted)">You can now proceed to email dispatch</p>
+        </div>
+      ` : `
+        <div class="rounded-xl p-10 text-center mb-6" style="background:var(--card); border:1px solid var(--border)">
+          <i class="fas fa-inbox text-3xl mb-3" style="color:var(--border)"></i>
+          <p class="text-sm" style="color:var(--muted)">No completed merge jobs yet. Upload and merge client data first.</p>
+        </div>
+      `}
+    </div>
+  `;
+}
+
+function markSigned(jobId, clientId) {
+  const job = AppState.mergeJobs.find(j => j.id === jobId);
+  if (!job) return;
+  const client = job.clients.find(c => c.id === clientId);
+  if (client) {
+    client.signedPdfUploaded = true;
+    saveState();
+    showToast(`Signed PDF for ${client.name} marked as uploaded`, 'success');
+    renderApp();
+  }
+}
+
+function markAllSigned() {
+  const completedJobs = AppState.mergeJobs.filter(j => j.status === 'completed');
+  let count = 0;
+  completedJobs.forEach(job => {
+    job.clients.forEach(c => {
+      if (c.pdfGenerated && !c.signedPdfUploaded) {
+        c.signedPdfUploaded = true;
+        count++;
+      }
+    });
+  });
+  saveState();
+  showToast(`${count} signed PDFs marked as uploaded`, 'success');
+  renderApp();
+}
+
+// ============================================================
+// Screen: Email Dispatch
+// ============================================================
+function renderDispatchScreen() {
+  const completedJobs = AppState.mergeJobs.filter(j => j.status === 'completed');
+  const emailableClients = completedJobs.flatMap(j => 
+    j.clients.filter(c => c.signedPdfUploaded && !c.emailSent).map(c => ({...c, jobId: j.id, year: j.year}))
+  );
+  const sentClients = completedJobs.flatMap(j => 
+    j.clients.filter(c => c.emailSent).map(c => ({...c, jobId: j.id, year: j.year}))
+  );
+
+  return `
+    <div class="slide-up">
+      <div class="flex items-center gap-4 mb-6">
+        <button class="lg:hidden p-2 rounded-lg" style="background:var(--surface-elevated); color:var(--muted)" onclick="toggleMobileMenu()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="font-display text-2xl font-bold" style="color:var(--fg)">Email Dispatch</h1>
+          <p class="text-sm mt-1" style="color:var(--muted)">Send password-protected zipped PDFs to clients via secure SMTP</p>
+        </div>
+      </div>
+
+      <!-- SMTP Config Card -->
+      <div class="rounded-xl p-5 mb-6" style="background:var(--card); border:1px solid var(--border)">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fas fa-server text-sm" style="color:var(--accent)"></i>
+          <h2 class="font-display text-sm font-semibold" style="color:var(--fg)">SMTP Configuration</h2>
+          <span class="badge badge-success">Connected</span>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          ${[
+            { l:'SMTP Server', v:'smtp.intranet.local' },
+            { l:'Port', v:'587 (TLS)' },
+            { l:'From Address', v:'notifications@intranet.local' },
+            { l:'Auth Method', v:'Kerberos' }
+          ].map(f => `
+            <div>
+              <p class="text-xs mb-1" style="color:var(--muted)">${f.l}</p>
+              <p class="text-sm font-mono" style="color:var(--fg)">${f.v}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Pending Dispatch -->
+      ${emailableClients.length > 0 ? `
+        <div class="rounded-xl overflow-hidden mb-6" style="background:var(--card); border:1px solid var(--border)">
+          <div class="px-5 py-3 flex items-center justify-between" style="border-bottom:1px solid var(--border)">
+            <div class="flex items-center gap-3">
+              <h2 class="font-display text-sm font-semibold" style="color:var(--fg)">Ready to Dispatch</h2>
+              <span class="badge badge-warning">${emailableClients.length} pending</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="toggleAllDispatch()" class="btn-secondary px-3 py-1.5 rounded-md text-xs">Toggle All</button>
+              <button onclick="dispatchEmails()" class="btn-primary px-4 py-1.5 rounded-md text-sm flex items-center gap-2">
+                <i class="fas fa-paper-plane text-xs"></i> Send Emails
+              </button>
+            </div>
+          </div>
+          <div class="divide-y" style="border-color:var(--border)">
+            ${emailableClients.map(c => `
+              <div class="flex items-center gap-4 px-5 py-3 log-row">
+                <input type="checkbox" class="custom-check dispatch-check" data-client-id="${c.id}" data-job-id="${c.jobId}" checked>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <p class="text-sm font-medium">${c.name}</p>
+                    <span class="text-xs font-mono" style="color:var(--muted)">${c.id}</span>
+                  </div>
+                  <p class="text-xs" style="color:var(--muted)">${c.email} — FY ${c.year}-${String(c.year+1).slice(2)}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs" style="color:var(--muted)"><i class="fas fa-lock text-[10px] mr-1"></i>ZIP Password</span>
+                  <span class="font-mono text-xs px-2 py-0.5 rounded" style="background:var(--surface-elevated); color:var(--accent)">${c.name.split(' ')[0].toLowerCase()}${c.year}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : completedJobs.length > 0 ? `
+        <div class="rounded-xl p-10 text-center mb-6" style="background:var(--card); border:1px solid var(--border)">
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3" style="background:rgba(52,211,153,0.1)">
+            <i class="fas fa-check-double text-xl" style="color:var(--accent)"></i>
+          </div>
+          <p class="text-sm font-medium" style="color:var(--fg)">All emails have been dispatched</p>
+          <p class="text-xs mt-1" style="color:var(--muted)">No pending emails to send</p>
+        </div>
+      ` : `
+        <div class="rounded-xl p-10 text-center mb-6" style="background:var(--card); border:1px solid var(--border)">
+          <i class="fas fa-inbox text-3xl mb-3" style="color:var(--border)"></i>
+          <p class="text-sm" style="color:var(--muted)">No signed PDFs available for dispatch yet</p>
+        </div>
+      `}
+
+      <!-- Dispatch History -->
+      ${sentClients.length > 0 ? `
+        <div class="rounded-xl overflow-hidden" style="background:var(--card); border:1px solid var(--border)">
+          <div class="px-5 py-3" style="border-bottom:1px solid var(--border)">
+            <h2 class="font-display text-sm font-semibold" style="color:var(--fg)">Dispatch History</h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr style="border-bottom:1px solid var(--border)">
+                  <th class="text-left px-5 py-2.5 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Client</th>
+                  <th class="text-left px-5 py-2.5 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Email</th>
+                  <th class="text-left px-5 py-2.5 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Year</th>
+                  <th class="text-left px-5 py-2.5 text-xs font-medium uppercase tracking-wider" style="color:var(--muted)">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${sentClients.map(c => `
+                  <tr class="log-row" style="border-bottom:1px solid var(--border)">
+                    <td class="px-5 py-2.5">
+                      <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold" style="background:rgba(52,211,153,0.15); color:var(--accent)">
+                          ${c.name.split(' ').map(n=>n[0]).join('')}
+                        </div>
+                        <span class="text-sm">${c.name}</span>
+                      </div>
+                    </td>
+                    <td class="px-5 py-2.5 text-xs" style="color:var(--muted)">${c.email}</td>
+                    <td class="px-5 py-2.5 text-xs">FY ${c.year}-${String(c.year+1).slice(2)}</td>
+                    <td class="px-5 py-2.5">${getStatusBadge('completed')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function toggleAllDispatch() {
+  const checks = document.querySelectorAll('.dispatch-check');
+  const allChecked = Array.from(checks).every(c => c.checked);
+  checks.forEach(c => c.checked = !allChecked);
+}
+
+function dispatchEmails() {
+  const checks = document.querySelectorAll('.dispatch-check:checked');
+  if (checks.length === 0) {
+    showToast('No clients selected for email dispatch', 'warning');
+    return;
+  }
+
+  // Confirm modal
+  showModal(`
+    <div class="p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(52,211,153,0.1)">
+          <i class="fas fa-paper-plane" style="color:var(--accent)"></i>
+        </div>
+        <div>
+          <h3 class="font-display text-lg font-semibold" style="color:var(--fg)">Confirm Email Dispatch</h3>
+          <p class="text-xs" style="color:var(--muted)">This action will send emails to the selected clients</p>
+        </div>
+      </div>
+      <div class="rounded-lg p-4 mb-5" style="background:var(--surface-elevated)">
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div>
+            <p class="text-xs" style="color:var(--muted)">Recipients</p>
+            <p class="font-display font-bold" style="color:var(--accent)">${checks.length}</p>
+          </div>
+          <div>
+            <p class="text-xs" style="color:var(--muted)">Attachment</p>
+            <p class="text-sm">Password-protected ZIP</p>
+          </div>
+          <div>
+            <p class="text-xs" style="color:var(--muted)">From</p>
+            <p class="text-sm font-mono">notifications@intranet.local</p>
+          </div>
+          <div>
+            <p class="text-xs" style="color:var(--muted)">Via</p>
+            <p class="text-sm">Secure SMTP (TLS)</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="executeDispatch()" class="btn-primary px-5 py-2.5 rounded-lg text-sm flex items-center gap-2">
+          <i class="fas fa-paper-plane text-xs"></i> Confirm and Send
+        </button>
+        <button onclick="closeModal()" class="btn-secondary px-5 py-2.5 rounded-lg text-sm">Cancel</button>
+      </div>
+    </div>
+  `, { width: 'max-w-md' });
+}
+
+function executeDispatch() {
+  closeModal();
+  const checks = document.querySelectorAll('.dispatch-check:checked');
+  let count = 0;
+  
+  checks.forEach(check => {
+    const clientId = check.dataset.clientId;
+    const jobId = check.dataset.jobId;
+    const job = AppState.mergeJobs.find(j => j.id === jobId);
+    if (job) {
+      const client = job.clients.find(c => c.id === clientId);
+      if (client) {
+        client.emailSent = true;
+        count++;
+      }
+    }
+  });
+
+  saveState();
+  showToast(`${count} email${count > 1 ? 's' : ''} dispatched successfully via secure SMTP`, 'success');
+  renderApp();
+}
+
+// ============================================================
+// Navigation & App Shell
+// ============================================================
+function navigateTo(screen) {
+  AppState.currentScreen = screen;
+  renderApp();
+}
+
+function handleLogout() {
+  showModal(`
+    <div class="p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(244,63,94,0.1)">
+          <i class="fas fa-right-from-bracket" style="color:#fb7185"></i>
+        </div>
+        <div>
+          <h3 class="font-display text-lg font-semibold" style="color:var(--fg)">Sign Out</h3>
+          <p class="text-xs" style="color:var(--muted)">Are you sure you want to sign out?</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="confirmLogout()" class="btn-danger px-5 py-2.5 rounded-lg text-sm">Sign Out</button>
+        <button onclick="closeModal()" class="btn-secondary px-5 py-2.5 rounded-lg text-sm">Cancel</button>
+      </div>
+    </div>
+  `, { width: 'max-w-sm' });
+}
+
+function confirmLogout() {
+  closeModal();
+  AppState.currentUser = null;
+  AppState.currentScreen = 'login';
+  saveState();
+  showToast('You have been signed out', 'info');
+  renderApp();
+}
+
+function renderApp() {
+  const app = document.getElementById('app');
+
+  if (AppState.currentScreen === 'login') {
+    renderLogin();
+    return;
+  }
+
+  // App shell with sidebar
+  const screenRenderers = {
+    browse: renderBrowseScreen,
+    upload: renderUploadScreen,
+    merge: renderMergeScreen,
+    signed: renderSignedScreen,
+    dispatch: renderDispatchScreen
+  };
+
+  const content = (screenRenderers[AppState.currentScreen] || renderBrowseScreen)();
+
+  app.innerHTML = `
+    <div class="flex h-screen overflow-hidden bg-base-900">
+      ${renderSidebar()}
+      <main class="flex-1 overflow-y-auto p-6 lg:p-8 relative z-0" style="background:var(--bg)">
+        ${content}
+      </main>
+    </div>
+  `;
+
+  // Initialize screen-specific behaviors
+  if (AppState.currentScreen === 'upload') {
+    initDropzone();
+  }
+}
+
+// ============================================================
+// Initialize
+// ============================================================
+loadState(); // Load from LocalStorage or Init Mock Data
+renderApp();
+</script>
+</body>
+</html>
